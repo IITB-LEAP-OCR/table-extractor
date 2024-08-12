@@ -8,8 +8,8 @@ from transformers import TableTransformerForObjectDetection
 feature_extractor = DetrImageProcessor()
 model = TableTransformerForObjectDetection.from_pretrained("microsoft/table-transformer-structure-recognition-v1.1-all")
 
-def get_rows_cols_from_tatr(img_file, row_thresh = 0.25,
-                            col_thresh = 0.7, row_nms = 0.01, col_nms = 0.99):
+def get_rows_cols_from_tatr(img_file, row_thresh=0.7,
+                            col_thresh=0.7, row_nms=0.1, col_nms=0.1):
     image = Image.open(img_file).convert("RGB")
     width, height = image.size
     image.resize((int(width * 0.5), int(height * 0.5)))
@@ -71,3 +71,10 @@ def get_cells_from_rows_cols(rows, cols):
         ordered_cells[i] = cells
         i = i + 1
     return ordered_cells
+
+if __name__ == "__main__":
+
+    rows, cols = get_rows_cols_from_tatr(img_file='table.jpeg')
+    print(len(rows))
+    print(len(cols))
+    print(get_cells_from_rows_cols(rows, cols))

@@ -1,1 +1,1 @@
-from .physical_tsr import *
+from .physical_tsr import get_cells_from_rows_cols, get_rows_cols_from_tatr

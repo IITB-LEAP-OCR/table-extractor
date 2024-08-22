@@ -1,4 +1,6 @@
 import os
+
+import cv2
 from PIL import Image
 import pandas as pd
 import numpy as np
@@ -6,17 +8,17 @@ import pytesseract
 import matplotlib.pyplot as plt
 import argparse
 from td import TableDetector
-from tsr import get_cells_from_rows_cols, get_rows_cols_from_tatr
+from tsr import get_rows_from_yolo, get_cols_from_tatr, get_cells_from_rows_cols
 from utils import *
 
 # Set the TESSDATA_PREFIX environment variable
 # os.environ['TESSDATA_PREFIX'] = '/raid/ganesh/vishak/miniconda3/envs/coe/share'
 
 
-parser = argparse.ArgumentParser(description='Table Detection')
-parser.add_argument('-p', '--pdf', type=str, help='Path to the image', required=True)
-
-args = parser.parse_args()
+# parser = argparse.ArgumentParser(description='Table Detection')
+# parser.add_argument('-p', '--pdf', type=str, help='Path to the image', required=True)
+#
+# args = parser.parse_args()
 
 def save_cells(cropped_img, cells, output_dir):
     os.makedirs(output_dir, exist_ok=True)
@@ -48,8 +50,10 @@ def ocr_cells(cropped_img, cells):
 if __name__=="__main__":
     
     table_det = TableDetector()
-    images = pdf_to_images(args.pdf)
-    image = np.array(images[0])
+    # images = pdf_to_images(args.pdf)
+    # image = np.array(images[0])
+    image_file = 'first_page.png'
+    image = cv2.imread(image_file)
     # plt.imsave("image.jpg", image)
     dets = table_det.predict(image=image)
     all_ocr_data = []
@@ -58,7 +62,9 @@ if __name__=="__main__":
         cropped_img = image[y1:y2, x1:x2]  # Crop the image using the bounding box
         plt.imsave("cropped_img.jpg", cropped_img)
         img_file = "cropped_img.jpg"
-        rows, cols = get_rows_cols_from_tatr(img_file)
+        #rows, cols = get_rows_cols_from_tatr(img_file)
+        rows = get_rows_from_yolo(img_file)
+        cols = get_cols_from_tatr(img_file)
         print(len(rows))
         print(len(cols))
 

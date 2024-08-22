@@ -1,1 +1,2 @@
-from .physical_tsr import get_cells_from_rows_cols, get_rows_cols_from_tatr
+#from .physical_tsr import get_cells_from_rows_cols, get_rows_cols_from_tatr
+from .yolo_tatr_tsr import get_rows_from_yolo, get_cols_from_tatr, get_cells_from_rows_cols

@@ -17,8 +17,6 @@ Divided into 3-stage approach:
 
 
 ### Steps to Run
-'''
-python3 main.py
-'''
+```python3 main.py```
 
 More information available [here](https://docs.google.com/document/d/195hJvzB7FHCWJIyQwvkvLEL6n6vO85EvYp70we2vwGc/edit)

@@ -15,4 +15,10 @@ Divided into 3-stage approach:
    Input: Detected Cell bounding boxes
    Output: OCR of the cells to be used as keys and values
 
+
+### Steps to Run
+'''
+python3 main.py
+'''
+
 More information available [here](https://docs.google.com/document/d/195hJvzB7FHCWJIyQwvkvLEL6n6vO85EvYp70we2vwGc/edit)

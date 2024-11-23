@@ -5,10 +5,14 @@ The 'uploads' directory has sample images.
 
 
 ## Setting Up
-Install the required dependencies
+
+#### Install the required dependencies
 ```commandline
 pip install -r requirements.in
 ```
+#### Download the model
+Download sprint.pt from the Releases Section and place it in 'tables/model' directory.
+
 
 ## Source Code Details
 Following table calls are integrated in this repository

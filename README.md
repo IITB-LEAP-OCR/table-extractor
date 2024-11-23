@@ -1,4 +1,4 @@
-# table-kv-extractor
+# table-extractor
 Key Value Extraction from Tables in Documents
 
 Divided into 3-stage approach:

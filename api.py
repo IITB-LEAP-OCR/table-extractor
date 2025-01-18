@@ -3,9 +3,12 @@ from PIL import Image
 from tables.main import perform_td, perform_tsr, get_full_page_hocr
 from tables.utils import draw_bboxes
 import os
+import pytesseract
 
 # Title of the app
 st.title("Table Reconstruction Tool")
+
+st.image("resources/iitb-bhashini-logo.png", use_column_width=True)
 
 # 1. Image Uploader
 uploaded_file = st.file_uploader("Upload an image...", type=["jpg", "png", "jpeg"])
@@ -17,6 +20,10 @@ mode = st.selectbox("Choose a mode:",
                      "TSR - Struc + Content",
                      "Full Page Reconstruction"])
 
+language = st.text_input(label= "Enter language here [Valid only for OCR]", value="eng")
+langs = pytesseract.get_languages()
+avail_langs = 'Available languages are : ' + str(langs)
+st.text(avail_langs)
 # Go Button
 go = st.button("GO")
 
@@ -44,7 +51,7 @@ if uploaded_file is not None and go:
 
     elif mode == "TSR - Struc ONLY":
         # Placeholder logic for TSR - Struc ONLY: returns HTML-like table structure
-        html_output, struct_cells = perform_tsr(img_path, 0, 0, True)
+        html_output, struct_cells = perform_tsr(img_path, 0, 0, True, language)
         processed_image = draw_bboxes(img_path, struct_cells, (0, 128, 255), 1)
         st.image(processed_image, caption = 'TSR Output', use_column_width = True)
         print(html_output)
@@ -52,7 +59,7 @@ if uploaded_file is not None and go:
 
     elif mode == "TSR - Struc + Content":
         # Placeholder logic for TSR - Struc + Content: returns HTML-like structure and content
-        html_output, struct_cells = perform_tsr(img_path, 0, 0, False)
+        html_output, struct_cells = perform_tsr(img_path, 0, 0, False, language)
         processed_image = draw_bboxes(img_path, struct_cells, (0, 128, 255), 1)
         st.image(processed_image, caption = 'TSR Output', use_column_width = True)
         print(html_output)
@@ -60,7 +67,7 @@ if uploaded_file is not None and go:
 
     elif mode == "Full Page Reconstruction":
         # Placeholder logic for Full Page Reconstruction: returns full page HTML-like structure
-        html_output = get_full_page_hocr(img_path, 'eng')
+        html_output = get_full_page_hocr(img_path, language)
         st.markdown(html_output, unsafe_allow_html=True)
         st.write("Full page reconstruction generated.")
 

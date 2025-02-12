@@ -33,6 +33,11 @@ def perform_tsr(img_file, x1, y1, struct_only, lang):
     print(str(len(rows)) + ' rows detected')
     print(str(len(cols)) + ' cols detected')
     rows, cols = order_rows_cols(rows, cols)
+    # Ensure that detected table has atleast one cell!!
+    if rows < 1:
+        rows = 1
+    if cols < 1:
+        cols = 1
     ## Extracting Grid Cells
     cells = get_cells_from_rows_cols(rows, cols)
 

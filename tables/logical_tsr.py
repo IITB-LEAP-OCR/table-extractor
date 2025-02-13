@@ -1,8 +1,6 @@
 import torch
 from PIL import Image
 from torchvision import transforms
-import pathlib
-import os
 
 def convert_otsl_list(otsl_list):
     final_seq = []
@@ -41,34 +39,34 @@ def get_cell_spans(otsl_matrix, i, j):
         cs = count_contiguous_occurrences(col_seq, 'U')
         return rs, cs
 
-def get_conv_html_from_otsl(otsl_matrix, R, C):
-    html_string = '<html><table><tbody>'
-    # Generate string
-    for i in range(R):
-        html_string += '<tr>'
-        for j in range(C + 1):
-            e = otsl_matrix[i][j]
-            if e == 'C':
-                rs, cs = get_cell_spans(otsl_matrix, i, j)
-                if rs and cs:
-                    # There is rowspan and colspan
-                    html_string += f'<td rowpsan="{rs + 1}" colspan="{cs + 1}"></td>'
-                elif rs and not cs:
-                    # There is only row span
-                    html_string += f'<td colspan="{rs + 1}"></td>'
-                elif not rs and cs:
-                    # There is only col span
-                    html_string += f'<td rowspan="{cs + 1}"></td>'
-                else:
-                    # Normal cell
-                    html_string += '<td></td>'
-            elif e == 'N':
-                # New row will start
-                html_string += '</tr>'
-            else:
-                continue
-    html_string += '</tbody></table></html>'
-    return html_string
+# def get_conv_html_from_otsl(otsl_matrix, R, C):
+#     html_string = '<html><table><tbody>'
+#     # Generate string
+#     for i in range(R):
+#         html_string += '<tr>'
+#         for j in range(C + 1):
+#             e = otsl_matrix[i][j]
+#             if e == 'C':
+#                 rs, cs = get_cell_spans(otsl_matrix, i, j)
+#                 if rs and cs:
+#                     # There is rowspan and colspan
+#                     html_string += f'<td rowpsan="{rs + 1}" colspan="{cs + 1}"></td>'
+#                 elif rs and not cs:
+#                     # There is only row span
+#                     html_string += f'<td colspan="{rs + 1}"></td>'
+#                 elif not rs and cs:
+#                     # There is only col span
+#                     html_string += f'<td rowspan="{cs + 1}"></td>'
+#                 else:
+#                     # Normal cell
+#                     html_string += '<td></td>'
+#             elif e == 'N':
+#                 # New row will start
+#                 html_string += '</tr>'
+#             else:
+#                 continue
+#     html_string += '</tbody></table></html>'
+#     return html_string
 
 def get_conv_html_from_otsl_with_cells(otsl_matrix, R, C, cells):
     html_string = '<table border="1" class="ocr_tab" title=""><tbody>'
@@ -138,10 +136,7 @@ def align_otsl_from_rows_cols(otsl_string, rows, cols):
     return final_otsl_string
 
 def convert_to_html(otsl_string, R, C, cells):
-    # Get N(sequence length), R(rows), C(cols)
-    # C = int(otsl_string.find('N'))
     N = len(otsl_string)
-
     if N != (C + 1) * R:
         # Needs correction
         actual_N = (C + 1) * R
@@ -167,7 +162,6 @@ def convert_to_html(otsl_string, R, C, cells):
             otsl_matrix[i][0] = 'C'
 
     # Return converted string
-    #return get_conv_html_from_otsl(otsl_matrix, R, C)
     return get_conv_html_from_otsl_with_cells(otsl_matrix, R, C, cells)
 
 def get_logical_structure(img_file, device):
@@ -177,7 +171,7 @@ def get_logical_structure(img_file, device):
     input_img = torch.stack([img])
 
     # if not torch.device("cpu"):
-    input_img = input_img.to(torch.device('cuda:0'))
+    input_img = input_img.to(torch.device('cpu'))
 
     # Infer
     pred = model(input_img, None, return_preds=True)

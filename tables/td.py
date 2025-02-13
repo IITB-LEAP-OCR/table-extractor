@@ -1,6 +1,5 @@
 import os
 import glob
-
 import tqdm
 import cv2
 import numpy as np
@@ -45,7 +44,6 @@ class TableDetector:
                 if conf[i] > thresh:
                     dets.append([box[0], box[1], box[2], box[3]])
         return dets
-
 
 if __name__=="__main__":
     td = TableDetector()

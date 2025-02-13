@@ -1,12 +1,10 @@
-import os
-import cv2
 from PIL import Image
 import pytesseract
 import matplotlib.pyplot as plt
 from .td import TableDetector
-from .tsr import get_rows_from_yolo, get_cols_from_tatr, get_cells_from_rows_cols, get_rows_from_tatr
+from .physical_tsr import get_cols_from_tatr, get_cells_from_rows_cols, get_rows_from_tatr
 from .utils import *
-from .sprint import get_logical_structure, align_otsl_from_rows_cols, convert_to_html
+from .logical_tsr import get_logical_structure, align_otsl_from_rows_cols, convert_to_html
 from bs4 import BeautifulSoup
 import pathlib
 import torch
@@ -33,18 +31,19 @@ def perform_tsr(img_file, x1, y1, struct_only, lang):
     print(str(len(rows)) + ' rows detected')
     print(str(len(cols)) + ' cols detected')
     rows, cols = order_rows_cols(rows, cols)
-    # Ensure that detected table has atleast one cell!!
-    if rows < 1:
-        rows = 1
-    if cols < 1:
-        cols = 1
     ## Extracting Grid Cells
     cells = get_cells_from_rows_cols(rows, cols)
-
+    ## Corner case if no cells detected
+    if len(cells) == 0:
+        table_img = cv2.imread(img_file)
+        h, w, c = table_img.shape
+        bbox = [0, 0, w, h]
+        text = get_cell_ocr(table_img, bbox, lang)
+        html_string = '<html><table><tr><td>' + text + '</td></tr></table></html>'
+        return html_string
     print('Logical TSR')
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     otsl_string = get_logical_structure(img_file, device)
-    #otsl_string = 'FFLLNEFLFNFFFFNFFFFNUFFFNUFFFNFFFFN'
     corrected_otsl = align_otsl_from_rows_cols(otsl_string, len(rows), len(cols))
     # Correction
     corrected_otsl = corrected_otsl.replace("E", "C")
@@ -52,17 +51,6 @@ def perform_tsr(img_file, x1, y1, struct_only, lang):
     print('OTSL => ' + otsl_string)
     print("Corrected OTSL => " + corrected_otsl)
     html_string, struc_cells = convert_to_html(corrected_otsl, len(rows), len(cols), cells)
-
-    ## Visualize Rows and Columns
-    # row_image = draw_bboxes(img_file, rows, color=(255, 66, 55), thickness=2)
-    # cols_image = draw_bboxes(img_file, cols, color=(22, 44, 255), thickness=2)
-    # cv2.imwrite('rows.jpg', row_image)
-    # cv2.imwrite('cols.jpg', cols_image)
-
-    ## Visualize Cells
-    # cell_image = draw_bboxes(img_file, struc_cells, color = (23, 255, 45), thickness = 1)
-    # cv2.imwrite('cell.jpg', cell_image)
-
     # Parse the HTML
     soup = BeautifulSoup('<html>' + html_string + '</html>', 'html.parser')
 

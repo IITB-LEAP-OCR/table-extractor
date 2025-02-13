@@ -5,7 +5,6 @@ import cv2
 def pdf_to_images(input_pdf):
     # Open the input PDF
     images = pdf2image.convert_from_path(input_pdf)
-    
     return images
 
 def draw_bboxes(img_file, bboxes, color = (255, 0, 255), thickness= 2):
@@ -15,7 +14,6 @@ def draw_bboxes(img_file, bboxes, color = (255, 0, 255), thickness= 2):
         end_point = (int(b[2]), int(b[3]))
         image = cv2.rectangle(image, start_point, end_point, color, thickness)
     return image
-
 
 def order_rows_cols(rows, cols):
     # Order rows from top to bottom based on y1 (second value in the bounding box)

@@ -8,7 +8,7 @@ import pytesseract
 # Title of the app
 st.title("Table Reconstruction Tool")
 
-st.image("resources/iitb-bhashini-logo.png", use_column_width=True)
+# st.image("resources/iitb-bhashini-logo.png", use_column_width=True)
 
 # 1. Image Uploader
 uploaded_file = st.file_uploader("Upload an image...", type=["jpg", "png", "jpeg"])

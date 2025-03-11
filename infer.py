@@ -15,7 +15,7 @@ print(img_path)
 if mode == 'td':
     result = perform_td(img_path)
 elif mode == 'tsr':
-    result, struc_cells = perform_tsr(img_path, 0, 0, struct_flag)
+    result, struc_cells = perform_tsr(img_path, 0, 0, struct_flag, 'eng')
 else:
     result = get_full_page_hocr(img_path, 'eng')
 

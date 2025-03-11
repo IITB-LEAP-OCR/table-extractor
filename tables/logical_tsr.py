@@ -171,12 +171,25 @@ def get_logical_structure(img_file, device):
     input_img = torch.stack([img])
 
     # if not torch.device("cpu"):
-    input_img = input_img.to(torch.device('cpu'))
+    input_img = input_img.to(torch.device('cuda:0'))
 
     # Infer
-    pred = model(input_img, None, return_preds=True)
+    pred = model(input_img, None, return_model_output=True, return_preds=True)
+    tensor = pred['out_map']
+    # print(tensor.size())
+    # print(type(tensor))
+    
+    # Post Process
+    out_idxs = tensor.argmax(-1)
+    vocab_map = {0:'E', 1:'F', 2 :'N', 3:'L', 4:'X', 5:'U', 6:'EOS', 7:'SOS', 8:'PAD'} 
+    outputs = out_idxs.detach().cpu().tolist()[0]
+    eos = outputs.index(6)
+    trimmed_outputs = outputs[:eos]
+    otsl_from_tensor = "".join(vocab_map[num] for num in trimmed_outputs)
     otsl = pred['preds'][0][0]
-    return otsl
+    # print(otsl_from_tensor)
+    # print(otsl)
+    return otsl_from_tensor
 
 # Config
 test_transforms = transforms.Compose([

@@ -31,9 +31,17 @@ go = st.button("GO")
 if uploaded_file is not None:
     # Load the uploaded image
     image = Image.open(uploaded_file)
+    # Resizing images for good quality
     with open(os.path.join('uploads/', uploaded_file.name), "wb") as f:
         f.write(uploaded_file.getbuffer())
     img_path = os.path.join('uploads/', uploaded_file.name)
+    print(img_path)
+    print('IMAGE PATH ABOVE')
+    image = Image.open(img_path)
+    width, height = image.size
+    if width < 2048:
+        image = image.resize((width * 3, height * 3))
+    image.save(img_path)
 
     # Display the uploaded image
     st.image(image, caption='Uploaded Image', use_column_width=True)

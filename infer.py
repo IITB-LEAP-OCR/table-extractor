@@ -11,7 +11,7 @@ if struc_only is not None:
     if struc_only == 'False':
         struct_flag = False
 
-print(img_path)
+
 if mode == 'td':
     result = perform_td(img_path)
 elif mode == 'tsr':

@@ -1,23 +1,11 @@
-from PIL import Image
-import pytesseract
 import matplotlib.pyplot as plt
 from .td import TableDetector
 from .physical_tsr import get_cols_from_tatr, get_cells_from_rows_cols, get_rows_from_tatr
 from .utils import *
 from .logical_tsr import get_logical_structure, align_otsl_from_rows_cols, convert_to_html
+from .ocr import *
 from bs4 import BeautifulSoup
-import pathlib
 import torch
-
-CURRENT_DIR = pathlib.Path(__file__).parent.absolute()
-
-def get_cell_ocr(img, bbox, lang):
-    cell_img = img[bbox[1]:bbox[3], bbox[0]:bbox[2]]
-    cell_pil_img = Image.fromarray(cell_img)
-    ocr_result = pytesseract.image_to_string(cell_pil_img, config='--psm 6', lang = lang)
-    ocr_result = ocr_result.replace("\n", " ")
-    ocr_result = ocr_result[:-1]
-    return ocr_result
 
 def perform_td(image_path):
     image = cv2.imread(image_path)
@@ -34,13 +22,13 @@ def perform_tsr(img_file, x1, y1, struct_only, lang):
     ## Extracting Grid Cells
     cells = get_cells_from_rows_cols(rows, cols)
     ## Corner case if no cells detected
-    if len(cells) == 0:
+    if len(cells) == 0 or len(cols) == 0 or len(rows) == 0:
         table_img = cv2.imread(img_file)
         h, w, c = table_img.shape
         bbox = [0, 0, w, h]
         text = get_cell_ocr(table_img, bbox, lang)
-        html_string = '<html><table><tr><td>' + text + '</td></tr></table></html>'
-        return html_string
+        html_string = '<p>' + text + '</p>'
+        return html_string, []
     print('Logical TSR')
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     otsl_string = get_logical_structure(img_file, device)
@@ -57,19 +45,11 @@ def perform_tsr(img_file, x1, y1, struct_only, lang):
     # Do this if struct_only flag is FALSE
     if struct_only == False:
         cropped_img = cv2.imread(img_file)
-        for bbox in soup.find_all('td'):
-            # Replace the content inside the div with its 'title' attribute value
-            ocr_bbox = bbox['title'].split(' ')[1:]
-            ocr_bbox = list(map(int, ocr_bbox))
-            bbox.string = get_cell_ocr(cropped_img, ocr_bbox, lang)
-            # Correct wrt table coordinates
-            ocr_bbox[0] += x1
-            ocr_bbox[1] += y1
-            ocr_bbox[2] += x1
-            ocr_bbox[3] += y1
-            bbox['title'] = f'bbox {ocr_bbox[0]} {ocr_bbox[1]} {ocr_bbox[2]} {ocr_bbox[3]}'
+        # Perform OCR
+        soup = get_table_ocr_all_at_once(cropped_img, soup, lang, x1, y1)
 
     return soup, struc_cells
+
 
 def get_full_page_hocr(img_file, lang):
     tabledata = get_table_hocrs(img_file, lang)
@@ -102,12 +82,16 @@ def get_full_page_hocr(img_file, lang):
             tab_element = entry[0]
             tab_bbox = entry[1]
             tab_position = tab_bbox[1]
+            tab_inserted = False
             for elem in soup.find_all('span', class_="ocr_line"):
                 find_all_ele = elem.attrs["title"].split(" ")
                 line_position = int(find_all_ele[2])
                 if tab_position < line_position:
                     elem.insert_before(tab_element)
+                    tab_inserted = True
                     break
+            if not tab_inserted:
+                elem.insert_after(tab_element)
 
     return soup
 

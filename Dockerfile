@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.in
 ADD infer.py .
 ADD ./tables/ ./tables/
 ADD ./uploads/ ./uploads/
-ADD ./app/ ./app/  # Add this line assuming your FastAPI app lives in `app/main.py`
+ADD ./app/ ./app/  
 
 # Expose FastAPI default port
 EXPOSE 8000

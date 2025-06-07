@@ -89,15 +89,15 @@ def find_text_for_cell(ocr_data, cell_bbox, iou_threshold = 0.0000000000000001, 
 
 def get_table_ocr_all_at_once(cropped_img, soup, lang, x1, y1):
     # Full Table OCR
-    ocr_data = get_full_table_ocr_data(cropped_img, lang=lang)
-    used_indices = None
+    # ocr_data = get_full_table_ocr_data(cropped_img, lang=lang)
+    # used_indices = None
     for bbox in soup.find_all('td'):
-        # Replace the content inside the div with its 'title' attribute value
+        # # Replace the content inside the div with its 'title' attribute value
         ocr_bbox = bbox['title'].split(' ')[1:]
         ocr_bbox = list(map(int, ocr_bbox))
-        bbox.string, used_indices = find_text_for_cell(ocr_data, ocr_bbox, used_indices=used_indices)
-        if bbox.string.strip() == "":
-            bbox.string = get_cell_ocr(cropped_img, ocr_bbox, lang)
+        # bbox.string, used_indices = find_text_for_cell(ocr_data, ocr_bbox, used_indices=used_indices)
+        # if bbox.string.strip() == "":
+        bbox.string = get_cell_ocr(cropped_img, ocr_bbox, lang)
         # Correct wrt table coordinates
         ocr_bbox[0] += x1
         ocr_bbox[1] += y1

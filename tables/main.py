@@ -45,6 +45,7 @@ def perform_tsr(img_file, x1, y1, struct_only, lang):
     # Do this if struct_only flag is FALSE
     if struct_only == False:
         cropped_img = cv2.imread(img_file)
+        print("Will now perform OCR of cells")
         # Perform OCR
         soup = get_table_ocr_all_at_once(cropped_img, soup, lang, x1, y1)
 

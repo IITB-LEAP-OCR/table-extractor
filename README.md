@@ -1,60 +1,107 @@
-# table-extractor
-Consists of various table-related inference calls for table reconstruction in documents. 
-All the code is encapsulated in the 'tables' directory.
-The 'uploads' directory has sample images.
+# TSR API (Table Structure Recognition)
 
+A Dockerized Flask API for performing physical and logical table structure recognition on document images.
 
-## Setting Up
+---
 
-#### Install the required dependencies
-```commandline
-pip install -r requirements.in
-```
-#### Download the model
-Download sprint.pt from the Releases Section and place it in 'tables/model' directory.
+## 🚀 1. Creating the Docker Image
 
+You can either build the Docker image locally or pull it from Docker Hub.
 
-## Source Code Details
-Following table calls are integrated in this repository
+### 🔨 Build Locally
 
-### table-detection
-Based on our trained Yolo model equipped for multilingual table detection. 
-
-```commandline
-python3 infer.py <page-image-path> td True
+```bash
+docker build -t tsr-image:1 .
 ```
 
-### table-structure-recognition
-Based on SPRINT, our script-agnostic table structure recognizer can predict OTSL sequences.
+### 📦 Pull from Docker Hub
 
-```commandline
-python3 infer.py <table-image-path> tsr True
+```bash
+docker pull your-dockerhub-username/tsr-image:1
 ```
 
-### full-page-reconstrcution
-Uses YOLO-based table detector, SPRINT and Tesseract to generate an HOCR composed of text and tables in the inoput page image.
+> Replace `your-dockerhub-username` with your actual Docker Hub username.
 
-```commandline
-python3 infer.py <page-image-path> ocr True
+---
+
+## 🧱 2. Running the API Server (Container)
+
+Run the container as a long-running service on port `8000`:
+
+```bash
+docker run --gpus all -d -p 8000:8000 \
+  --name tsr-api-instance \
+  -v /data/DHRUV/table-api/table-extractor/uploads:/app/uploads \
+  tsr-image:1
 ```
 
+### 🛠 Container Management Commands
 
-## Containerization
+| Action  | Command                           |
+| ------- | --------------------------------- |
+| Start   | `docker start tsr-api-instance`   |
+| Restart | `docker restart tsr-api-instance` |
+| Stop    | `docker stop tsr-api-instance`    |
+| Logs    | `docker logs tsr-api-instance`    |
 
-### Building Image
+---
+
+## 📡 3. API Usage
+
+### ✅ Health Check
+
+Verify the server is up:
+
 ```
-cd tables
-docker build -t tablecalls .
+GET http://localhost:8000/health
 ```
 
-### Running Container
-```
-docker run --rm --gpus all -it -v '/data/DHRUV/Document-OCR-App/document-layout-ocr/uploads/table.jpg':/docker/uploads/tables.jpg tablecalls uploads/table.jpg tsr False
+Expected response:
+
+```json
+{
+  "status": "ok"
+}
 ```
 
-## User Interface
-Uses streamlit to run all the required calls
+---
 
-```commandline
-streamlit run api.py
+### 📤 Table Structure Recognition
+
+Send a POST request to process an image:
+
 ```
+POST http://localhost:8000/tsr
+```
+
+#### Example using `curl`:
+
+```bash
+curl -X POST http://localhost:8000/tsr -F "file=@/path/to/your/image.jpg"
+```
+
+#### Response (example):
+
+```json
+{
+  "status": "success",
+  "table_structure": "<table><tr><td>...</td></tr></table>"
+}
+```
+
+---
+
+## ⚠️ Common Errors
+
+* **Tesseract Not Found**
+  Ensure Tesseract is installed inside the container and accessible via PATH.
+
+* **No NVIDIA Driver Found**
+  Make sure NVIDIA GPU drivers are correctly installed on the host, and `--gpus all` is used when starting the container.
+
+---
+
+## 📁 Notes
+
+* The mounted `uploads` folder at `/data/DHRUV/table-api/table-extractor/uploads` is used to store uploaded files during processing.
+* Ensure that this path exists on the host and has the appropriate permissions.
